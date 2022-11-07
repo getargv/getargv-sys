@@ -7,7 +7,7 @@ license-file = "LICENSE"
 readme = "README.md"
 authors = ["CamJN <getargv@narzt.cam>"]
 homepage = "https://getargv.narzt.cam/"
-documentation = "https://getargv.narzt.cam/rustdocs"
+documentation = "https://docs.rs/getargv-sys"
 repository = "https://github.com/getargv/getargv-sys/"
 description = "The first and only library to provide a correct interface to the KERN_PROCARGS2 sysctl."
 categories = ["external-ffi-bindings", "os::macos-apis"]
@@ -15,3 +15,6 @@ keywords = ["argv", "arguments", "macOS", "KERN_PROCARGS2", "sysctl"]
 
 [build-dependencies]
 bindgen = "0.61.0"
+
+[package.metadata.docs.rs]
+targets = ["x86_64-apple-darwin", "aarch64-apple-darwin"]
