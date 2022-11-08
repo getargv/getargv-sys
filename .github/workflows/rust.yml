@@ -16,7 +16,21 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        name: getargv/getargv
+        path: getargv
+    - name: Build libgetargv
+      run: make install_dylib
+      with:
+        working-directory: getargv
+    - uses: actions/checkout@v3
+      with:
+        path: getargv-sys
     - name: Build
       run: cargo build --verbose
+      with:
+        working-directory: getargv-sys
     - name: Run tests
       run: cargo test --verbose
+      with:
+        working-directory: getargv-sys
