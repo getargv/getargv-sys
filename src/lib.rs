@@ -15,8 +15,9 @@ mod tests {
         unsafe {
             let mut result: ArgvResult = mem::zeroed();
             let options: GetArgvOptions = GetArgvOptions {pid: process::id() as pid_t, skip: 0, nuls: false};
-            get_argv_of_pid(&options, &mut result);
+            let success = get_argv_of_pid(&options, &mut result);
             let result_char: c_char = *result.end_pointer;
+            assert!(success);
             assert_eq!(result_char, b'\0' as i8);
         }
     }

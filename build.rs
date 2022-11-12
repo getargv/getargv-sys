@@ -4,9 +4,10 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
-    let lib_path = env::var("LIB_PATH").unwrap_or_else(|_|"/usr/local/lib".to_string());
+    let lib_path = option_env!("LIB_PATH").unwrap_or("/usr/local/lib");
     // Tell cargo to look for shared libraries in the specified directory
     println!("cargo:rustc-link-search={}",lib_path);
+    println!("cargo:rustc-link-arg=-Wl,-rpath,{}",lib_path);
 
     // Tell cargo to tell rustc to link the system getargv
     // shared library.
