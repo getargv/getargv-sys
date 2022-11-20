@@ -46,7 +46,7 @@ fn main() {
     let lib_env = "LIBGETARGV_LIB_DIR";
     let lib_path = env::var(lib_env).unwrap_or_else(|_| "/usr/local/lib".to_string());
     let lib_name = "libgetargv.dylib";
-    let lib = Path::new(&lib_path).join(lib_name);
+    let lib = Path::new(&lib_path).join(lib_name).canonicalize().expect("cannot canonicalize path");
     if !lib.exists() {
         panic!("Couldn't locate {1}, try setting the {0} env var to the path to the directory in which {1} is located.", lib_env, lib_name);
     }
@@ -94,6 +94,8 @@ fn main() {
         .allowlist_function(".*_of_pid")
     // Allow emitting desired types by name
         .allowlist_type(".*Argv.*")
+    // Don't allow copying structs with pointers, leads to calling free multiple times
+        .no_copy(".*Result")
     // Finish the builder and generate the bindings.
         .generate()
     // Unwrap the Result and panic on failure.

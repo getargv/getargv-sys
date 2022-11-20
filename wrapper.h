@@ -28,7 +28,7 @@ struct ArgvResult {
   char* end_pointer;
 };
 
-bool print_argv_of_pid(char* start_pointer, char* end_pointer);
+bool print_argv_of_pid(const char* start_pointer, const char* end_pointer);
 bool get_argv_of_pid(const struct GetArgvOptions* options, struct ArgvResult* result);
 bool get_argv_and_argc_of_pid(pid_t pid, struct ArgvArgcResult* result);
 
