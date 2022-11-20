@@ -2,6 +2,10 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_snake_case)]
 
+/*-
+ * Copyright: see LICENSE file
+ */
+
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
 #[cfg(test)]

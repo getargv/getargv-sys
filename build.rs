@@ -1,3 +1,7 @@
+/*-
+ * Copyright: see LICENSE file
+ */
+
 extern crate bindgen;
 
 use std::env;
