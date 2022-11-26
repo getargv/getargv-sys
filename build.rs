@@ -46,12 +46,12 @@ fn main() {
     let lib_env = "LIBGETARGV_LIB_DIR";
     let lib_path = env::var(lib_env).unwrap_or_else(|_| "/usr/local/lib".to_string());
     let lib_name = "libgetargv.dylib";
-    let lib = Path::new(&lib_path).join(lib_name).canonicalize().expect("cannot canonicalize path");
+    let lib = Path::new(&lib_path).join(lib_name);
     if !lib.exists() {
         panic!("Couldn't locate {1}, try setting the {0} env var to the path to the directory in which {1} is located.", lib_env, lib_name);
     }
     // Tell cargo to look for shared libraries in the specified directory
-    println!("cargo:rustc-link-search={}", lib_path);
+    println!("cargo:rustc-link-search={}", Path::new(&lib_path).canonicalize().expect("cannot canonicalize path").display());
     // println!("cargo:rustc-link-arg=-Wl,-rpath,{}", lib_path); // this isn't the one that should set rpath, that's the c lib
 
     // Tell cargo to tell rustc to link the system getargv
