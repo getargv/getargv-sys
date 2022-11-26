@@ -2,9 +2,31 @@
  * Copyright: see LICENSE file
  */
 
+#![doc(html_logo_url = "https://getargv.narzt.cam/images/logo.svg")]
+#![deny(rustdoc::bare_urls)]
+#![deny(rustdoc::missing_crate_level_docs)]
+#![deny(rustdoc::invalid_rust_codeblocks)]
+#![deny(rustdoc::broken_intra_doc_links)]
 #![allow(non_camel_case_types)]
 #![allow(non_upper_case_globals)]
 #![allow(non_snake_case)]
+
+//! Unsafe Rust bindings for the [getargv library](https://getargv.narzt.cam/).
+//!
+//! This crate provides unsafe FFI bindings for [libgetargv](https://getargv.narzt.cam/),
+//! there is a safe wrapper in the
+//! [getargv](https://docs.rs/getargv/latest/getargv/) crate.
+//!
+//! You almost certainly do not want to use this crate directly.
+//!
+//! You must have [libgetargv](https://getargv.narzt.cam/) installed for
+//! this crate to link to, it will not build/install it for you. If
+//! `libgetargv.dylib` is not located in one of `clang`'s default search
+//! paths, you must set the`LIBGETARGV_LIB_DIR` env var to tell `rustc`
+//! where to find it, and you will either need to set the
+//! `DYLD_FALLBACK_LIBRARY_PATH` env var at runtime to tell dyld where
+//! to load it from, or you will need to use `install_name_tool` on your
+//! binary to fixup the library load path.
 
 use std::mem;
 
