@@ -47,7 +47,10 @@ fn main() {
     let lib_path = env::var(lib_env).unwrap_or_else(|_| "/usr/local/lib".to_string());
     let lib_name = "libgetargv.dylib";
     let lib = Path::new(&lib_path).join(lib_name);
-    if !lib.exists() {
+    if !lib.exists() && env::var_os(lib_env).is_some() {
+        panic!("Couldn't locate {1} in {0}, check version in name.", env::var(lib_env).unwrap(), lib_name);
+        //env::vars().for_each(|(key, value)| println!("cargo:warning={}={}", key, value));
+    } else if !lib.exists() {
         panic!("Couldn't locate {1}, try setting the {0} env var to the path to the directory in which {1} is located.", lib_env, lib_name);
     }
     // Tell cargo to look for shared libraries in the specified directory
