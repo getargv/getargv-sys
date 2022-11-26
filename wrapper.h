@@ -19,8 +19,8 @@ struct GetArgvOptions {
 };
 struct ArgvArgcResult {
   char*  buffer;
-  uint   argc;
   char** argv;
+  uint   argc;
 };
 struct ArgvResult {
   char* buffer;
