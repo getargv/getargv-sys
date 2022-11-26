@@ -73,4 +73,18 @@ mod tests {
             ));
         }
     }
+
+    #[test]
+    fn argv_result_default_trait_sanity_test() {
+        let zeroed: ArgvResult = unsafe { mem::zeroed() };
+        let result: ArgvResult = Default::default();
+        assert_eq!(result.buffer, zeroed.buffer);
+    }
+
+    #[test]
+    fn argv_argc_result_default_trait_sanity_test() {
+        let zeroed: ArgvArgcResult = unsafe { mem::zeroed() };
+        let result: ArgvArgcResult = Default::default();
+        assert_eq!(result.buffer, zeroed.buffer);
+    }
 }
