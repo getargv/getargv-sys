@@ -40,7 +40,7 @@ fn find_version(lib: &Path) -> String {
 
 fn main() {
     if cfg!(not(target_vendor = "apple")) {
-        panic!("The KERN_PROCARGS2 sysctl only exists in xnu kernels, linux users should just read /proc/$PID/cmdline which is much easier and faster.")
+        panic!("The KERN_PROCARGS2 sysctl only exists in xnu kernels, BSD or Linux users should just read /proc/$PID/cmdline which is much easier and faster, Solaris users should use pargs.")
     }
 
     let lib_env = "LIBGETARGV_LIB_DIR";

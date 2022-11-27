@@ -9,7 +9,7 @@ authors = ["CamJN <getargv@narzt.cam>"]
 homepage = "https://getargv.narzt.cam/"
 documentation = "https://docs.rs/getargv-sys"
 repository = "https://github.com/getargv/getargv-sys/"
-description = "The first and only library to provide a correct interface to the KERN_PROCARGS2 sysctl."
+description = "FFI bindings for libgetargv on macOS"
 categories = ["external-ffi-bindings", "os::macos-apis"]
 keywords = ["argv", "arguments", "macOS", "KERN_PROCARGS2", "sysctl"]
 
@@ -18,3 +18,6 @@ bindgen = "0.61.0"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-apple-darwin", "aarch64-apple-darwin"]
+
+[build]
+target = ["x86_64-apple-darwin", "aarch64-apple-darwin"]
