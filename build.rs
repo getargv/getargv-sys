@@ -40,7 +40,7 @@ fn find_version(lib: &Path) -> String {
 
 fn main() {
     if cfg!(not(target_vendor = "apple")) {
-        panic!("The KERN_PROCARGS2 sysctl only exists in xnu kernels, BSD or Linux users should just read /proc/$PID/cmdline which is much easier and faster, Solaris users should use pargs.")
+        panic!("The KERN_PROCARGS2 sysctl only exists in xnu kernels, BSD or Linux users should just read /proc/$PID/cmdline which is much easier and faster, Solaris users should use pargs.\nIf you are writing a cross platform program, you can depend on this crate only on macOS by specifying the dependency as:\n[target.'cfg(target_vendor = \"apple\")'.dependencies]\ngetargv = \"{}\"",env!("CARGO_PKG_VERSION"))
     }
 
     let lib_env = "LIBGETARGV_LIB_DIR";
