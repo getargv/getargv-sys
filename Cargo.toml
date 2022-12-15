@@ -18,6 +18,3 @@ bindgen = "0.61.0"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-apple-darwin", "aarch64-apple-darwin"]
-
-[build]
-target = ["x86_64-apple-darwin", "aarch64-apple-darwin"]
