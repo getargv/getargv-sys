@@ -18,7 +18,7 @@ To make `getargv-sys`:
 
  - Install `libgetargv` to your system (see below).
  - Clone this repo and run `cargo build` or
- - add `getargv-sys = "0.1.0"` to your `Cargo.toml` file dependencies.
+ - add `getargv-sys = "0.4.0"` to your `Cargo.toml` file dependencies.
 
 ## Installing `libgetargv`
 
@@ -31,4 +31,4 @@ Running `make install_dylib`, installs the library to the `/usr/local/` prefix b
 I'm working on building binary artifacts to install without compilation, using `pkg` installers, however even once that's done, depeding on your system, it may still be nessesary to compile from source; eg. if you have built your own xnu kernel with a custom `PID_MAX` value.
 
 ## Building `libgetargv`
-I've built `libgetargv` on macOS 10.7-12, using only the <abbr title="Command Line Tools">CLT</abbr> package, not the full Xcode install. If you need to override variables, do so inside the `make` command, eg: `make EXTRA_CPPFLAGS=-DMACRO EXTRA_CFLAGS=-std=c17 dylib`. If you are trying to build on a version of macOS earlier than 10.7, let me know how it goes.
+I've built `libgetargv` on macOS 10.7-13, using only the <abbr title="Command Line Tools">CLT</abbr> package, not the full Xcode install. If you need to override variables, do so inside the `make` command, eg: `make EXTRA_CPPFLAGS=-DMACRO EXTRA_CFLAGS=-std=c17 dylib`. If you are trying to build on a version of macOS earlier than 10.7, let me know how it goes.
