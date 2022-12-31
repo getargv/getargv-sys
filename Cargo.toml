@@ -1,7 +1,7 @@
 [package]
 name = "getargv-sys"
 links = "getargv"
-version = "0.4.1"
+version = "0.4.2"
 edition = "2021"
 license-file = "LICENSE"
 readme = "README.md"
@@ -15,6 +15,12 @@ keywords = ["argv", "arguments", "macOS", "KERN_PROCARGS2", "sysctl"]
 
 [build-dependencies]
 bindgen = "~0.63.0"
+
+[build-dependencies.goblin]
+version = "~0.6.0"
+git = "https://github.com/m4b/goblin"
+branch = "master"
+features = ["mach64","std"]
 
 [package.metadata.docs.rs]
 targets = ["x86_64-apple-darwin", "aarch64-apple-darwin"]
