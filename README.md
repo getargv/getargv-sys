@@ -18,7 +18,7 @@ To make `getargv-sys`:
 
  - Install `libgetargv` to your system (see below).
  - Clone this repo and run `cargo build` or
- - add `getargv-sys = "0.4.1"` to your `Cargo.toml` file dependencies.
+ - add `getargv-sys = "0.5.0"` to your `Cargo.toml` file dependencies.
 
 ## Installing `libgetargv`
 
