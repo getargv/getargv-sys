@@ -123,11 +123,11 @@ impl From<u32> for Version {
 
 impl From<MachO<'_>> for Version {
     fn from(b: MachO) -> Self {
-        let packed = b.load_commands.iter().filter_map(|c|match c.command {
+        let packed = b.load_commands.iter().find_map(|c|match c.command {
             CommandVariant::VersionMinMacosx(v) => Some(v.version),
             CommandVariant::BuildVersion(v) => Some(v.minos),
             _ => None
-        }).next().unwrap();
+        }).unwrap();
         Self::from(packed)
     }
 }
