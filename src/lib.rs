@@ -49,6 +49,7 @@ impl Default for ArgvArgcResult {
 mod tests {
     use super::*;
     use std::env;
+    use std::mem::forget;
     use std::os::raw::c_char;
     use std::process;
     use std::ffi::OsStr;
@@ -67,6 +68,7 @@ mod tests {
             let expected = env::args_os().collect::<Vec<_>>().join(OsStr::from_bytes(&[b' ']));
             let actual = CStr::from_ptr(result.start_pointer);
             assert_eq!(expected.to_str().unwrap(), actual.to_str().unwrap());
+            free_ArgvResult(&mut result);
         }
     }
 
@@ -80,6 +82,8 @@ mod tests {
             for (a,e) in env::args_os().zip(v.iter()) {
                 assert_eq!(CStr::from_ptr(*e).to_str().unwrap(), a.to_str().unwrap());
             }
+            free_ArgvArgcResult(&mut result);
+            forget(v);//would otherwise try to free argv in result
         }
     }
 
@@ -93,6 +97,7 @@ mod tests {
                 result.start_pointer,
                 result.end_pointer
             ));
+            free_ArgvResult(&mut result);
         }
     }
 
