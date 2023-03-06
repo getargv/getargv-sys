@@ -5,6 +5,10 @@
  * Copyright: see LICENSE file
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <sys/types.h>
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
   #include <stdbool.h>
@@ -31,5 +35,11 @@ struct ArgvResult {
 bool print_argv_of_pid(const char* start_pointer, const char* end_pointer);
 bool get_argv_of_pid(const struct GetArgvOptions* options, struct ArgvResult* result);
 bool get_argv_and_argc_of_pid(pid_t pid, struct ArgvArgcResult* result);
+void free_ArgvArgcResult(struct ArgvArgcResult* result);
+void free_ArgvResult(struct ArgvResult* result);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
