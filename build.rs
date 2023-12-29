@@ -238,7 +238,7 @@ fn main() {
     .header(header)
     // Tell cargo to invalidate the built crate whenever any of the
     // included header files changed.
-        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
     // Allow emitting desired fns by name
         .allowlist_function(".*_of_pid|free_Argv.*")
     // Allow emitting desired types by name
