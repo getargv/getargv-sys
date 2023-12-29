@@ -155,7 +155,7 @@ fn ensure_apple() {
 }
 
 fn debug_env() {
-    env::vars().for_each(|(key, value)| println!("cargo:warning={}={}", key, value));
+    env::vars().for_each(|(key, value)| println!("cargo::warning={}={}", key, value));
 }
 
 fn locate_llvm_config() {
@@ -194,31 +194,31 @@ fn main() {
         }
         // Tell cargo to look for shared libraries in the specified directory
         println!(
-            "cargo:rustc-link-search={}",
+            "cargo::rustc-link-search={}",
             lib_path
                 .canonicalize()
                 .expect("cannot canonicalize path")
                 .display()
         );
-        // println!("cargo:rustc-link-arg=-Wl,-rpath,{}", lib_path); // this isn't the one that should set rpath, that's the c lib
+        // println!("cargo::rustc-link-arg=-Wl,-rpath,{}", lib_path); // this isn't the one that should set rpath, that's the c lib
 
         // Tell cargo to tell rustc to link the system getargv shared library.
-        println!("cargo:rustc-link-lib=getargv");
+        println!("cargo::rustc-link-lib=getargv");
 
         // Tell cargo to invalidate the built crate whenever the wrapper changes
-        println!("cargo:rerun-if-env-changed={}", lib_env);
-        println!("cargo:rerun-if-changed={}", header);
+        println!("cargo::rerun-if-env-changed={}", lib_env);
+        println!("cargo::rerun-if-changed={}", header);
 
         // Tell rust/cargo/bindgen what macOS this is
         let key = "MACOSX_DEPLOYMENT_TARGET";
         let version = env::var(key).map(|s|s.parse::<Version>().unwrap()).unwrap_or_else(|_| find_version(&lib));
-        let version_s = format!("{}", version);
-        env::set_var(key, version_s);
-        println!("cargo:{}={}", key, version);
+        println!("cargo::rerun-if-env-changed={}", key);
+        println!("cargo::rustc-env={}={}", key, version);
+        println!("cargo::metadata={}={}", key, version);
 
         // pidmax probably not neccesary, i don't think rust really works on 10.5
         println!(
-            "cargo:PID_MAX={}",
+            "cargo::metadata=PID_MAX={}",
             if version >= (Version{major:10,minor:6,patch:0}) { 99_999 } else { 30_000 }
         );
     }
