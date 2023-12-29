@@ -30,3 +30,15 @@ jobs:
     - name: Run tests
       run: cargo test --verbose
       working-directory: getargv-sys
+
+    - name: Dryrun Publish Crate
+      run: cargo publish --dry-run
+    - name: Bump version
+      run: |
+        cargo install cargo-bump
+        cargo bump patch --git-tag
+        git push --follow-tags
+    - name: Publish Crate
+      run: cargo publish --token ${CRATES_TOKEN}
+      env:
+        CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
