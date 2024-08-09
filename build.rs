@@ -4,25 +4,25 @@
 
 extern crate bindgen;
 
-use goblin::mach::{SingleArch,Mach,MachO};
-use goblin::mach::cputype::{CPU_TYPE_X86_64,CPU_TYPE_ARM64};
-use goblin::mach::load_command::CommandVariant;
 use goblin::error::Error;
+use goblin::mach::cputype::{CPU_TYPE_ARM64, CPU_TYPE_X86_64};
+use goblin::mach::load_command::CommandVariant;
+use goblin::mach::{Mach, MachO, SingleArch};
 use std::cmp::Ordering;
 use std::collections::VecDeque;
+use std::env::{self, VarError};
 use std::ffi::OsString;
-use std::{env,fmt,fs,str};
-use std::path::{Path,PathBuf};
+use std::path::{Path, PathBuf};
 use std::str::FromStr;
+use std::{fmt, fs};
 
 fn building_for_darwin() -> bool {
     // build-target is reflected in env
-    #[cfg(feature = "is_some_and")]{      env::var("CARGO_CFG_TARGET_VENDOR").is_ok_and(|v| v == "apple"}
-    #[cfg(not(feature = "is_some_and"))]{ env::var("CARGO_CFG_TARGET_VENDOR").unwrap() == "apple"}
+    env::var("CARGO_CFG_TARGET_VENDOR").is_ok_and(|v| v == "apple")
 }
 
-fn target_arch() -> String {
-    env::var("CARGO_CFG_TARGET_ARCH").unwrap()
+fn target_arch() -> Result<String, VarError> {
+    env::var("CARGO_CFG_TARGET_ARCH")
 }
 
 fn cross_compiling() -> bool {
@@ -33,10 +33,10 @@ fn cross_compiling() -> bool {
 
 fn homebrew_prefix(path: &str, package: &str) -> PathBuf {
     let arch = target_arch();
-    let hb_path = match arch.as_str() {
-        "x86_64" => PathBuf::from("/usr/local"),
-        "aarch64" => PathBuf::from("/opt/homebrew"),
-        _ => panic!("unknown arch {}", arch),
+    let hb_path = match arch.as_deref() {
+        Ok("x86_64") => PathBuf::from("/usr/local"),
+        Ok("aarch64") => PathBuf::from("/opt/homebrew"),
+        _ => panic!("unknown arch {}", arch.unwrap()),
     };
     if hb_path.join(path).exists() {
         hb_path.join(path)
@@ -84,9 +84,13 @@ impl Ord for Version {
         let mao = self.major.cmp(&other.major);
         let mio = self.minor.cmp(&other.minor);
         let pao = self.patch.cmp(&other.patch);
-        if mao == Ordering::Equal && mio == Ordering::Equal { pao }
-        else if mao == Ordering::Equal { mio }
-        else { mao }
+        if mao == Ordering::Equal && mio == Ordering::Equal {
+            pao
+        } else if mao == Ordering::Equal {
+            mio
+        } else {
+            mao
+        }
     }
 }
 
@@ -98,9 +102,7 @@ impl PartialOrd for Version {
 
 impl PartialEq for Version {
     fn eq(&self, other: &Self) -> bool {
-        self.major == other.major &&
-            self.minor == other.minor &&
-            self.patch == other.patch
+        self.major == other.major && self.minor == other.minor && self.patch == other.patch
     }
 }
 
@@ -111,11 +113,15 @@ impl FromStr for Version {
         let mut parts = s
             .trim()
             .split('.')
-            .map(|p|p.parse::<u32>().unwrap())
+            .map(|p| p.parse::<u32>().unwrap())
             .take(3)
             .collect::<VecDeque<u32>>();
 
-        Ok(Self { major: parts.pop_front().unwrap(), minor: parts.pop_front().unwrap_or(0), patch: parts.pop_front().unwrap_or(0) })
+        Ok(Self {
+            major: parts.pop_front().unwrap(),
+            minor: parts.pop_front().unwrap_or(0),
+            patch: parts.pop_front().unwrap_or(0),
+        })
     }
 }
 
@@ -126,34 +132,50 @@ impl From<u32> for Version {
         let major = (packed & 0b1111_1111_1111_1111_0000_0000_0000_0000u32) >> 16;
         let minor = (packed & 0b0000_0000_0000_0000_1111_1111_0000_0000u32) >> 8;
         let patch = (packed & 0b0000_0000_0000_0000_0000_0000_1111_1111u32) >> 0;
-        Self {major, minor, patch}
+        Self {
+            major,
+            minor,
+            patch,
+        }
     }
 }
 
 impl From<MachO<'_>> for Version {
     fn from(b: MachO) -> Self {
-        let packed = b.load_commands.iter().find_map(|c|match c.command {
-            CommandVariant::VersionMinMacosx(v) => Some(v.version),
-            CommandVariant::BuildVersion(v) => Some(v.minos),
-            _ => None
-        }).unwrap();
+        let packed = b
+            .load_commands
+            .iter()
+            .find_map(|c| match c.command {
+                CommandVariant::VersionMinMacosx(v) => Some(v.version),
+                CommandVariant::BuildVersion(v) => Some(v.minos),
+                _ => None,
+            })
+            .unwrap();
         Self::from(packed)
     }
 }
 
 fn find_version(lib: &Path) -> Version {
     match Mach::parse(&fs::read(lib).map_err(goblin::error::Error::IO).unwrap()).unwrap() {
-        Mach::Binary(b)=>Version::from(b),
-        Mach::Fat(f)=>{
-            match f.find(|r| r.unwrap().cputype == match target_arch().as_deref() {
-                Ok("x86_64") => CPU_TYPE_X86_64,
-                Ok("aarch64") => CPU_TYPE_ARM64,
-                _ => panic!("unknown arch"),
-            }).unwrap().ok().unwrap() {
-                SingleArch::MachO(b)=>Version::from(b),
-                SingleArch::Archive(_)=>panic!("lib is an archive?"),
+        Mach::Binary(b) => Version::from(b),
+        Mach::Fat(f) => {
+            match f
+                .find(|r| {
+                    r.unwrap().cputype
+                        == match target_arch().as_deref() {
+                            Ok("x86_64") => CPU_TYPE_X86_64,
+                            Ok("aarch64") => CPU_TYPE_ARM64,
+                            _ => panic!("unknown arch"),
+                        }
+                })
+                .unwrap()
+                .ok()
+                .unwrap()
+            {
+                SingleArch::MachO(b) => Version::from(b),
+                SingleArch::Archive(_) => panic!("lib is an archive?"),
             }
-        },
+        }
     }
 }
 
@@ -205,9 +227,9 @@ fn main() {
         println!(
             "cargo::rustc-link-search={}",
             lib_path
-                .canonicalize()
-                .expect("cannot canonicalize path")
-                .display()
+            .canonicalize()
+            .expect("cannot canonicalize path")
+            .display()
         );
         // println!("cargo::rustc-link-arg=-Wl,-rpath,{}", lib_path); // this isn't the one that should set rpath, that's the c lib
 
@@ -220,7 +242,9 @@ fn main() {
 
         // Tell rust/cargo/bindgen what macOS this is
         let key = "MACOSX_DEPLOYMENT_TARGET";
-        let version = env::var(key).map(|s|s.parse::<Version>().unwrap()).unwrap_or_else(|_| find_version(&lib));
+        let version = env::var(key)
+            .map(|s| s.parse::<Version>().unwrap())
+            .unwrap_or_else(|_| find_version(&lib));
         println!("cargo::rerun-if-env-changed={}", key);
         println!("cargo::rustc-env={}={}", key, version);
         println!("cargo::metadata={}={}", key, version);
@@ -228,7 +252,17 @@ fn main() {
         // pidmax probably not neccesary, i don't think rust really works on 10.5
         println!(
             "cargo::metadata=PID_MAX={}",
-            if version >= (Version{major:10,minor:6,patch:0}) { 99_999 } else { 30_000 }
+            if version
+            >= (Version {
+                major: 10,
+                minor: 6,
+                patch: 0
+            })
+            {
+                99_999
+            } else {
+                30_000
+            }
         );
     }
     // Tell rust/cargo/bindgen where llvm-config is
@@ -242,17 +276,17 @@ fn main() {
     } else {
         bindgen::Builder::default()
     }
-    // The input header we would like to generate
-    // bindings for.
-    .header(header)
-    // Tell cargo to invalidate the built crate whenever any of the
-    // included header files changed.
+        // The input header we would like to generate
+        // bindings for.
+        .header(header)
+        // Tell cargo to invalidate the built crate whenever any of the
+        // included header files changed.
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
-    // Allow emitting desired fns by name
+        // Allow emitting desired fns by name
         .allowlist_function(".*_of_pid|free_Argv.*")
-    // Allow emitting desired types by name
+        // Allow emitting desired types by name
         .allowlist_type(".*Argv.*")
-    // Don't allow copying structs with pointers, leads to calling free multiple times
+        // Don't allow copying structs with pointers, leads to calling free multiple times
         .no_copy(".*Result");
 
     // Finish the builder and generate the bindings.
@@ -261,7 +295,7 @@ fn main() {
         Err(e) => match e {
             bindgen::BindgenError::ClangDiagnostic(s) if cross_compiling() && s.contains("file not found") && s.split('\'').nth(1).is_some() => {
                 panic!("Clang could not find '{}', perhaps you need to set the 'BINDGEN_EXTRA_CLANG_ARGS' env var to something like: '--sysroot=/path/to/macos/sysroot'",
-                       s.split('\'').nth(1).unwrap()
+                    s.split('\'').nth(1).unwrap()
                 )
             }
             _ => {
@@ -270,6 +304,6 @@ fn main() {
             }
         },
     }
-    .write_to_file(out_path.join("bindings.rs"))
+        .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
 }
