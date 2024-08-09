@@ -16,6 +16,10 @@ use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use std::{fmt, fs};
 
+fn building_docs() -> bool {
+    env::var("DOCS_RS").is_ok_and(|v| v == "1")
+}
+
 fn building_for_darwin() -> bool {
     // build-target is reflected in env
     env::var("CARGO_CFG_TARGET_VENDOR").is_ok_and(|v| v == "apple")
@@ -206,7 +210,7 @@ fn main() {
         debug_env();
     }
     let header = "wrapper.h";
-    let building_docs = env::var("DOCS_RS").unwrap_or_else(|_| "0".to_string()) == "1";
+    let building_docs = building_docs();
     if !building_docs {
         let lib_env = "LIBGETARGV_LIB_DIR";
         let lib_path = env::var(lib_env)
