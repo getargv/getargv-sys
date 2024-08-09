@@ -15,15 +15,24 @@ use std::{env,fmt,fs,str};
 use std::path::{Path,PathBuf};
 use std::str::FromStr;
 
+fn building_for_darwin() -> bool {
+    // build-target is reflected in env
+    #[cfg(feature = "is_some_and")]{      env::var("CARGO_CFG_TARGET_VENDOR").is_ok_and(|v| v == "apple"}
+    #[cfg(not(feature = "is_some_and"))]{ env::var("CARGO_CFG_TARGET_VENDOR").unwrap() == "apple"}
+}
+
+fn target_arch() -> String {
+    env::var("CARGO_CFG_TARGET_ARCH").unwrap()
+}
+
 fn cross_compiling() -> bool {
-    //                                    host is reflected in cfg!             target is reflected in env
-    #[cfg(feature = "is_some_and")]{      cfg!(target_vendor = "apple") ^ env::var("CARGO_CFG_TARGET_VENDOR").is_ok_and(|v| v == "apple")}
-    #[cfg(not(feature = "is_some_and"))]{ cfg!(target_vendor = "apple") ^ (env::var("CARGO_CFG_TARGET_VENDOR").unwrap() == "apple")}
-    //                                        note the operator is xor (^) not a ligature of && (∧)
+    // build-host is reflected in cfg!
+    cfg!(target_vendor = "apple") ^ building_for_darwin()
+    //  note the operator is xor (^) not a ligature of && (∧)
 }
 
 fn homebrew_prefix(path: &str, package: &str) -> PathBuf {
-    let arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
+    let arch = target_arch();
     let hb_path = match arch.as_str() {
         "x86_64" => PathBuf::from("/usr/local"),
         "aarch64" => PathBuf::from("/opt/homebrew"),
@@ -136,7 +145,7 @@ fn find_version(lib: &Path) -> Version {
     match Mach::parse(&fs::read(lib).map_err(goblin::error::Error::IO).unwrap()).unwrap() {
         Mach::Binary(b)=>Version::from(b),
         Mach::Fat(f)=>{
-            match f.find(|r| r.unwrap().cputype == match env::var("CARGO_CFG_TARGET_ARCH").as_deref() {
+            match f.find(|r| r.unwrap().cputype == match target_arch().as_deref() {
                 Ok("x86_64") => CPU_TYPE_X86_64,
                 Ok("aarch64") => CPU_TYPE_ARM64,
                 _ => panic!("unknown arch"),
@@ -149,7 +158,7 @@ fn find_version(lib: &Path) -> Version {
 }
 
 fn ensure_apple() {
-    if env::var("CARGO_CFG_TARGET_VENDOR").unwrap() != "apple" {
+    if !building_for_darwin() {
         panic!("The KERN_PROCARGS2 sysctl only exists in xnu kernels, BSD or Linux users should just read /proc/$PID/cmdline which is much easier and faster, Solaris users should use pargs.\nIf you are writing a cross platform program, you can depend on this crate only on macOS by specifying the dependency as:\n[target.'cfg(target_vendor = \"apple\")'.dependencies]\n{} = \"{}\"",env!("CARGO_PKG_NAME"),env!("CARGO_PKG_VERSION"))
     }
 }
