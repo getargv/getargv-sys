@@ -3,6 +3,7 @@ name = "getargv-sys"
 links = "getargv"
 version = "0.5.3"
 edition = "2021"
+license = "BSD-3-Clause"
 license-file = "LICENSE"
 readme = "README.md"
 authors = ["CamJN <getargv@narzt.cam>"]
