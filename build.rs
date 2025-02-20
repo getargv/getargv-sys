@@ -195,11 +195,8 @@ fn debug_env() {
 
 fn locate_llvm_config() {
     let key = "LLVM_CONFIG_PATH";
-    env::set_var(
-        key,
-        env::var_os(key)
-            .unwrap_or_else(|| package_prefix("bin/llvm-config", "llvm").into_os_string()),
-    );
+    let var = env::var_os(key).unwrap_or_else(|| package_prefix("bin/llvm-config", "llvm").into_os_string());
+    unsafe { env::set_var(key, var); }
 }
 
 fn main() {

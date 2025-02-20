@@ -2,7 +2,8 @@
 name = "getargv-sys"
 links = "getargv"
 version = "0.5.5"
-edition = "2021"
+edition = "2024"
+rust-version = "1.85"
 license = "BSD-3-Clause"
 readme = "README.md"
 authors = ["CamJN <getargv@narzt.cam>"]
@@ -12,14 +13,13 @@ repository = "https://github.com/getargv/getargv-sys/"
 description = "FFI bindings for libgetargv on macOS"
 categories = ["external-ffi-bindings", "os::macos-apis"]
 keywords = ["argv", "arguments", "macOS", "KERN_PROCARGS2", "sysctl"]
-rust-version = "1.77"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-apple-darwin", "aarch64-apple-darwin"]
 
 [build-dependencies]
-bindgen = "~0.69.4"
+bindgen = "~0.71.1"
 
 [build-dependencies.goblin]
-version = "~0.8.0"
+version = "~0.9.3"
 features = ["mach64","std"]
